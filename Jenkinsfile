@@ -7,17 +7,18 @@ pipeline {
             	bat 'mvn clean'
                 bat 'mvn package'
             }
+        }        
+    	stage('Build'){
+            steps {
+                bat "mvn -Dmaven.test.failure.ignore=true clean package"
+            }
         }
+	    
         stage('Analyse') {
             steps {
             	bat 'mvn checkstyle:checkstyle'
-                bat 'mvn spotbugs:spotbugs'
+                //bat 'mvn spotbugs:spotbugs'
                 bat 'mvn pmd:pmd'
-            }
-        }
-        stage('Build'){
-            steps {
-                bat "mvn -Dmaven.test.failure.ignore=true clean package"
             }
         }
         stage('Publish') {
@@ -32,7 +33,7 @@ pipeline {
         always {
             junit '**/surefire-reports/*.xml'
             
-			recordIssues enabledForFailure: true, tools: [mavenConsole(), java(), javaDoc()]
+	    recordIssues enabledForFailure: true, tools: [mavenConsole(), java(), javaDoc()]
             recordIssues enabledForFailure: true, tool: checkStyle()
             recordIssues enabledForFailure: true, tool: spotBugs()
             recordIssues enabledForFailure: true, tool: cpd(pattern: '**/target/cpd.xml')
